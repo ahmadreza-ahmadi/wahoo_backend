@@ -7,7 +7,11 @@ import { NOT_FOUND_WEBSITE_MESSAGE } from './index.constant';
 const app = express();
 
 app.use(express.json());
-app.use(morgan('tiny'));
+
+if (app.get('env') === 'development') {
+	app.use(morgan('tiny'));
+	console.log('Morgan enabled...');
+}
 
 const websites: Website[] = [
 	{ id: 1, name: 'google', url: 'https://google.com' },
