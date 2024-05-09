@@ -1,11 +1,11 @@
 import express from 'express';
 import morgan from 'morgan';
-import routes from './routes';
+import ApiRoutes from './routes/api';
 
 const app = express();
 
 app.use(express.json());
-app.use('/api', routes);
+app.use('/api', ApiRoutes);
 
 if (app.get('env') === 'development') {
 	app.use(morgan('tiny'));
