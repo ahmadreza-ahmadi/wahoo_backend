@@ -1,17 +1,15 @@
-import express from 'express';
 import Joi from 'joi';
-const morgan = require('morgan');
-import type { Website } from './index.type';
-import { NOT_FOUND_WEBSITE_MESSAGE } from './index.constant';
+import { Router } from 'express';
 
-const app = express();
-
-app.use(express.json());
-
-if (app.get('env') === 'development') {
-	app.use(morgan('tiny'));
-	console.log('Morgan enabled...');
+// TYPES
+interface Website {
+	id: number;
+	name: string;
+	url: string;
 }
+
+// CONSTANTS
+const NOT_FOUND_WEBSITE_MESSAGE = 'The website with the given ID was not found.';
 
 const websites: Website[] = [
 	{ id: 1, name: 'google', url: 'https://google.com' },
@@ -19,11 +17,24 @@ const websites: Website[] = [
 	{ id: 3, name: 'facebook', url: 'https://facebook.com' },
 ];
 
-app.get('/api/website/read_all', (req, res) => {
+// VALIDATION
+function validateWebsite(website: unknown) {
+	const schema = Joi.object({
+		name: Joi.string().required(),
+		url: Joi.string().required(),
+	});
+
+	return schema.validate(website);
+}
+
+// ROUTER
+const router = Router();
+
+router.get('/read_all', (req, res) => {
 	res.send(websites);
 });
 
-app.get('/api/website/read/:id', (req, res) => {
+router.get('/read/:id', (req, res) => {
 	const website = websites.find(website => website.id === +req.params.id);
 
 	if (!website) {
@@ -34,7 +45,7 @@ app.get('/api/website/read/:id', (req, res) => {
 	res.send(website);
 });
 
-app.post('/api/website/create', (req, res) => {
+router.post('/create', (req, res) => {
 	const { error } = validateWebsite(req.body);
 	if (error) {
 		res.status(400).send(error.message);
@@ -51,7 +62,7 @@ app.post('/api/website/create', (req, res) => {
 	res.send(newWebsite);
 });
 
-app.put('/api/website/update/:id', (req, res) => {
+router.put('/update/:id', (req, res) => {
 	const website = websites.find(website => website.id === +req.params.id);
 
 	if (!website) {
@@ -71,7 +82,7 @@ app.put('/api/website/update/:id', (req, res) => {
 	res.send(updatedWebsite);
 });
 
-app.delete('/api/website/delete/:id', (req, res) => {
+router.delete('/delete/:id', (req, res) => {
 	const website = websites.find(website => website.id === +req.params.id);
 
 	if (!website) {
@@ -84,14 +95,4 @@ app.delete('/api/website/delete/:id', (req, res) => {
 	res.send(website);
 });
 
-const port = process.env.PORT || 3000;
-app.listen(port, () => console.log(`Listening on port ${port}...`));
-
-function validateWebsite(website: unknown) {
-	const schema = Joi.object({
-		name: Joi.string().required(),
-		url: Joi.string().required(),
-	});
-
-	return schema.validate(website);
-}
+export default router;
