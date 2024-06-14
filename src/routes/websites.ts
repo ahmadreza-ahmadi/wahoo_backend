@@ -5,7 +5,7 @@ import {
 	getAllWebsites,
 	getWebsite,
 	updateWebsite,
-} from '../controllers/website';
+} from '../controllers/websites';
 
 const router = Router();
 
