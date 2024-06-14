@@ -1,13 +1,9 @@
-import Joi from 'joi';
-import { RequestHandler } from 'express';
-import { NOT_FOUND_WEBSITE_MESSAGE, websites } from '../constants';
-import { validateWebsite } from '../validations';
+import express from 'express';
+import morgan from 'morgan';
 import mongoose from 'mongoose';
 
 mongoose
-	.connect(
-		'mongodb+srv://ahrahmadidev:0zw51FVuIRnrHqJm@cluster0.l974vy3.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0'
-	)
+	.connect(process.env.MONGODB_CONNECTION_KEY!)
 	.then(() => console.log('Connected to MongoDB'))
 	.catch(err => console.error('Could not connect to MongoDB', err));
 
@@ -18,17 +14,33 @@ const websiteSchema = new mongoose.Schema({
 
 const Website = mongoose.model('Website', websiteSchema);
 
-export const getAllWebsites: RequestHandler = async (req, res, next) => {
+const app = express();
+
+app.use(express.json());
+app.use(morgan('tiny'));
+app.use((req, res, next) => {
+	res.set({
+		'Access-Control-Allow-Origin': '*',
+		'Access-Control-Allow-Methods': 'GET, POST, DELETE, PATCH, PUT, OPTIONS',
+		'Access-Control-Allow-Headers': '*',
+		'Access-Control-Allow-Credentials': true,
+	});
+	next();
+});
+
+app.get('/', (req, res) => res.send('Express on Vercel'));
+
+app.get('/website/read_all', async (req, res, next) => {
 	const result = await Website.find();
 	res.send(result);
-};
+});
 
-export const getWebsite: RequestHandler = async (req, res, next) => {
+app.get('/website/read/:id', async (req, res, next) => {
 	try {
 		const website = await Website.findById(req.params.id);
 
 		if (!website) {
-			res.status(404).send(NOT_FOUND_WEBSITE_MESSAGE);
+			res.status(404).send('No website found with the given id.');
 			return;
 		}
 
@@ -36,9 +48,9 @@ export const getWebsite: RequestHandler = async (req, res, next) => {
 	} catch (error) {
 		res.send(error);
 	}
-};
+});
 
-export const createWebsite: RequestHandler = async (req, res, next) => {
+app.post('/website/create', async (req, res, next) => {
 	const website = new Website({
 		name: req.body.name,
 		url: req.body.url,
@@ -46,14 +58,14 @@ export const createWebsite: RequestHandler = async (req, res, next) => {
 
 	const result = await website.save();
 	res.send(result);
-};
+});
 
-export const updateWebsite: RequestHandler = async (req, res, next) => {
+app.put('/website/update/:id', async (req, res, next) => {
 	try {
 		const website = await Website.findById(req.params.id);
 
 		if (!website) {
-			res.status(404).send(NOT_FOUND_WEBSITE_MESSAGE);
+			res.status(404).send('No website found with the given id.');
 			return;
 		}
 
@@ -64,9 +76,9 @@ export const updateWebsite: RequestHandler = async (req, res, next) => {
 	} catch (error) {
 		res.send(error);
 	}
-};
+});
 
-export const deleteWebsite: RequestHandler = async (req, res, next) => {
+app.delete('/website/delete/:id', async (req, res, next) => {
 	try {
 		const result = await Website.findByIdAndDelete(req.params.id);
 
@@ -74,4 +86,8 @@ export const deleteWebsite: RequestHandler = async (req, res, next) => {
 	} catch (error) {
 		res.send(error);
 	}
-};
+});
+
+app.listen(3000, () => console.log(`Listening on port 3000...`));
+
+export default app;
