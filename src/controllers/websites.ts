@@ -5,7 +5,9 @@ import { validateWebsite } from '../validations';
 import mongoose from 'mongoose';
 
 mongoose
-	.connect('mongodb://localhost/wahoo')
+	.connect(
+		'mongodb+srv://ahrahmadidev:0zw51FVuIRnrHqJm@cluster0.l974vy3.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0'
+	)
 	.then(() => console.log('Connected to MongoDB'))
 	.catch(err => console.error('Could not connect to MongoDB', err));
 
