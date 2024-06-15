@@ -1,6 +1,7 @@
 import express from 'express';
 import morgan from 'morgan';
 import mongoose from 'mongoose';
+import cors from 'cors';
 
 mongoose
 	.connect(process.env.MONGODB_CONNECTION_KEY!)
@@ -18,11 +19,7 @@ const app = express();
 
 app.use(express.json());
 app.use(morgan('tiny'));
-app.all('/*', function (req, res, next) {
-	res.header('Access-Control-Allow-Origin', '*');
-	res.header('Access-Control-Allow-Headers', 'X-Requested-With');
-	next();
-});
+app.use(cors());
 
 app.get('/', (req, res) => res.send('Express on Vercel'));
 
