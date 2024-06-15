@@ -18,13 +18,9 @@ const app = express();
 
 app.use(express.json());
 app.use(morgan('tiny'));
-app.use((req, res, next) => {
-	res.set({
-		'Access-Control-Allow-Origin': '*',
-		'Access-Control-Allow-Methods': 'GET, POST, DELETE, PATCH, PUT, OPTIONS',
-		'Access-Control-Allow-Headers': '*',
-		'Access-Control-Allow-Credentials': true,
-	});
+app.all('/*', function (req, res, next) {
+	res.header('Access-Control-Allow-Origin', '*');
+	res.header('Access-Control-Allow-Headers', 'X-Requested-With');
 	next();
 });
 
